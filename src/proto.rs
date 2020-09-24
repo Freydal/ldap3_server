@@ -83,6 +83,7 @@ pub enum LdapOp {
     // https://tools.ietf.org/html/rfc4511#section-4.5
     SearchRequest(LdapSearchRequest),
     SearchResultEntry(LdapSearchResultEntry),
+    RawSearchEntry(RawLdap3SearchResultEntry),
     SearchResultDone(LdapResult),
     // https://tools.ietf.org/html/rfc4511#section-4.7
     AddRequest(LdapAddRequest),
@@ -174,6 +175,11 @@ pub struct LdapPartialAttribute {
 // A PartialAttribute allows zero values, while
 // Attribute requires at least one value.
 type LdapAttribute = LdapPartialAttribute;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RawLdap3SearchResultEntry {
+    pub st: StructureTag
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapSearchResultEntry {
@@ -460,6 +466,9 @@ impl From<LdapOp> for Tag {
                 id: 24,
                 inner: ler.into(),
             }),
+            LdapOp::RawSearchEntry(rse) => {
+                Tag::StructureTag(rse.st)
+            }
         }
     }
 }
@@ -1068,6 +1077,14 @@ impl TryFrom<StructureTag> for LdapPartialAttribute {
     }
 }
 
+impl From<StructureTag> for RawLdap3SearchResultEntry {
+    fn from(st: StructureTag) -> Self {
+        RawLdap3SearchResultEntry {
+            st
+        }
+    }
+}
+
 impl TryFrom<Vec<StructureTag>> for LdapSearchResultEntry {
     type Error = ();
 
@@ -1124,6 +1141,12 @@ impl From<LdapPartialAttribute> for Tag {
             ],
             ..Default::default()
         })
+    }
+}
+
+impl From<RawLdap3SearchResultEntry> for Tag {
+    fn from(e: RawLdap3SearchResultEntry) -> Self {
+        Tag::StructureTag(e.st)
     }
 }
 
