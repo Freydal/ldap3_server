@@ -17,6 +17,11 @@ license = "MPL-2.0"
 lber = "0.3"
 tokio-util = { version = "0.6", features = ["codec"] }
 bytes = "1"
+serde = { version = "1.0.115", features = ["derive"], optional = true }
+
+[features]
+default = []
+serde-support = ["serde"]
 
 [dev-dependencies]
 env_logger = "0.8"

@@ -8,6 +8,10 @@ use lber::universal::Types;
 use std::convert::{From, TryFrom};
 use std::iter::once_with;
 
+#[cfg(feature = "serde-support")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapMsg {
     pub msgid: i32,
@@ -15,6 +19,7 @@ pub struct LdapMsg {
     pub ctrl: Vec<()>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 #[repr(i64)]
 pub enum LdapResultCode {
@@ -67,6 +72,7 @@ pub enum LdapResultCode {
     Other = 80,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapResult {
     pub code: LdapResultCode,
@@ -75,6 +81,7 @@ pub struct LdapResult {
     pub referral: Vec<()>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum LdapOp {
     BindRequest(LdapBindRequest),
@@ -97,23 +104,27 @@ pub enum LdapOp {
     ExtendedResponse(LdapExtendedResponse),
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum LdapBindCred {
     Simple(String), // Sasl
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapBindRequest {
     pub dn: String,
     pub cred: LdapBindCred,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapBindResponse {
     pub res: LdapResult,
     pub saslcreds: Option<String>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 #[repr(i64)]
 pub enum LdapSearchScope {
@@ -122,6 +133,7 @@ pub enum LdapSearchScope {
     Subtree = 2,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 #[repr(i64)]
 pub enum LdapDerefAliases {
@@ -131,6 +143,7 @@ pub enum LdapDerefAliases {
     Always = 3,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LdapSubstringFilter {
     pub initial: Option<String>,
@@ -138,6 +151,7 @@ pub struct LdapSubstringFilter {
     pub final_: Option<String>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum LdapFilter {
     And(Vec<LdapFilter>),
@@ -152,6 +166,7 @@ pub enum LdapFilter {
     //Extensible
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapSearchRequest {
     pub base: String,
@@ -165,6 +180,7 @@ pub struct LdapSearchRequest {
 }
 
 // https://tools.ietf.org/html/rfc4511#section-4.1.7
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapPartialAttribute {
     pub atype: String,
@@ -175,18 +191,21 @@ pub struct LdapPartialAttribute {
 // Attribute requires at least one value.
 type LdapAttribute = LdapPartialAttribute;
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapSearchResultEntry {
     pub dn: String,
     pub attributes: Vec<LdapPartialAttribute>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapAddRequest {
     pub dn: String,
     pub attributes: Vec<LdapAttribute>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapExtendedRequest {
     // 0
@@ -195,6 +214,7 @@ pub struct LdapExtendedRequest {
     pub value: Option<Vec<u8>>,
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapExtendedResponse {
     pub res: LdapResult,
