@@ -193,11 +193,72 @@ pub struct LdapPartialAttribute {
 type LdapAttribute = LdapPartialAttribute;
 
 #[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde-support", serde(remote = "TagClass"))]
+#[cfg(feature = "serde-support")]
+pub enum TagClassSer {
+    Universal = 0,
+    Application = 1,
+    Context = 2,
+    Private = 3,
+}
+
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde-support", serde(remote = "PL"))]
+#[cfg(feature = "serde-support")]
+pub enum PLSer {
+    P(Vec<u8>),
+    #[serde(with = "structure_tag_vec")]
+    C(Vec<StructureTag>),
+}
+
+#[cfg(feature = "serde-support")]
+mod structure_tag_vec {
+    use lber::structure::{StructureTag};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use crate::proto::StructureTagSer;
+
+    pub fn serialize<S>(vec: &Vec<StructureTag>, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        #[derive(Serialize)]
+        struct W(#[serde(with = "StructureTagSer")] StructureTag);
+
+        let v: Vec<W> = vec.iter().map(|fil| W(fil.clone())).collect();
+        v.serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<StructureTag>, D::Error>
+        where
+            D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct W(#[serde(with = "StructureTagSer")] StructureTag);
+
+        let vec = Vec::<W>::deserialize(deserializer)?;
+        Ok(vec.into_iter().map(|W(a)| a).collect())
+    }
+}
+
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde-support", serde(remote = "StructureTag"))]
+#[cfg(feature = "serde-support")]
+pub struct StructureTagSer {
+    #[serde(with = "TagClassSer")]
+    pub class: TagClass,
+    pub id: u64,
+    #[serde(with = "PLSer")]
+    pub payload: PL,
+}
+
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RawLdap3SearchResultEntry {
+    #[cfg_attr(feature = "serde-support", serde(with = "StructureTagSer"))]
     pub st: StructureTag
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LdapSearchResultEntry {
     pub dn: String,
